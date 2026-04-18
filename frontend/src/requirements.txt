@@ -1,8 +1,8 @@
-Flask
-flask-cors
-numpy
-pandas
-scikit-learn
-joblib
-gunicorn
-firebase-admin
+Flask==3.0.3
+flask-cors==4.0.0
+numpy==1.26.4
+pandas==2.2.2
+scikit-learn==1.4.2
+joblib==1.4.2
+gunicorn==22.0.0
+firebase-admin==6.5.0
