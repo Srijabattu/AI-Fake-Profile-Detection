@@ -45,7 +45,7 @@ function Dashboard() {
   }
 
   try {
-    const res = await fetch("https://ai-fake-profile-detection-gt1a.onrender.com/analyze-profile", {
+    const res = await fetch("https://ai-fake-profile-detection-gtla.onrender.com/predict", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -66,7 +66,7 @@ function Dashboard() {
 };
   const analyzeManual = async () => {
     try {
-      const res = await fetch("https://ai-fake-profile-detection-gt1a.onrender.com/predict", {
+      const res = await fetch("https://ai-fake-profile-detection-gtla.onrender.com/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(manualData)
