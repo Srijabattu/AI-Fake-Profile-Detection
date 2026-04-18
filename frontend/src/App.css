@@ -1,0 +1,196 @@
+body{
+  margin:0;
+  font-family: 'Segoe UI', sans-serif;
+  background:#f5eee6;
+}
+
+/* Center container */
+.container{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+/* Mobile card */
+.cardWrapper{
+  width:360px;
+  background:#fff;
+  border-radius:25px;
+  padding:25px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.1);
+}
+
+/* Title */
+.title{
+  text-align:center;
+  font-size:22px;
+  font-weight:600;
+  color:#5a3e36;
+  margin-bottom:20px;
+}
+
+/* Inputs */
+input{
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border-radius:12px;
+  border:1px solid #ddd;
+  outline:none;
+}
+
+/* Buttons */
+button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border:none;
+  border-radius:15px;
+  background:#a47551;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#8b5e3c;
+}
+
+/* Mode buttons */
+.modeButtons{
+  display:flex;
+  gap:10px;
+  margin-bottom:15px;
+}
+
+.modeButtons button{
+  flex:1;
+  background:#d8b4a0;
+}
+
+/* Result */
+.result{
+  margin-top:20px;
+  padding:15px;
+  background:#fdf6f0;
+  border-radius:15px;
+}
+
+/* Risk colors */
+.lowRisk{ color:green; font-weight:bold; }
+.midRisk{ color:orange; font-weight:bold; }
+.highRisk{ color:red; font-weight:bold; }
+
+/* Small text */
+.smallText{
+  text-align:center;
+  margin-top:10px;
+  cursor:pointer;
+  color:#555;
+}
+/* Better spacing */
+.inputGroup{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin:15px 0;
+}
+
+/* Improve inputs */
+input{
+  padding:12px;
+  border-radius:12px;
+  border:1px solid #ddd;
+  font-size:14px;
+}
+
+/* Button spacing */
+button{
+  margin-top:15px;
+}
+
+/* Result spacing */
+.result{
+  margin-top:20px;
+  padding:15px;
+  border-radius:15px;
+}
+/* GRID FIX */
+.gridForm{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px; /* both row + column spacing */
+  margin: 20px 0;
+}
+
+/* INPUT FIX */
+.gridForm input{
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 13px;
+  background: #f9f9f9;
+
+  box-sizing: border-box;  /* 🔥 VERY IMPORTANT */
+}
+.gridForm input:last-child{
+  grid-column: span 1;
+}
+.gridForm input{
+  text-align: center;
+  background: #f4f4f4;
+  border: 1px solid #dcdcdc;
+  transition: 0.2s;
+}
+
+.gridForm input:focus{
+  background: white;
+  border-color: #a47551;
+}
+/* Form wrapper spacing */
+.formGroup{
+  margin: 15px 0;
+  padding: 0 5px; /* small inner breathing space */
+}
+
+/* Improve input appearance */
+.formGroup input{
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  background: #f9f9f9;
+  box-sizing: border-box;
+}
+/* Add breathing space inside card */
+.cardWrapper{
+  padding: 25px 20px;
+}
+/* Form spacing */
+.formGroup{
+  margin: 12px 0;
+  padding: 0 5px;
+}
+
+/* Input styling */
+.formGroup input{
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  background: #f9f9f9;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+/* Better button spacing */
+button{
+  margin-top: 12px;
+}
+
+/* Card padding improvement */
+.cardWrapper{
+  padding: 25px 20px;
+}
