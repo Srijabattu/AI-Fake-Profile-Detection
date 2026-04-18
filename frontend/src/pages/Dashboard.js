@@ -39,27 +39,31 @@ function Dashboard() {
   };
 
   const analyzeAuto = async () => {
-    if (!username) {
-      alert("Please enter username");
-      return;
-    }
+  if (!username) {
+    alert("Please enter username");
+    return;
+  }
 
-    try {
-      const res = await fetch("https://ai-fake-profile-detection-gt1a.onrender.com/analyze-profile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ input: username })
-      });
+  try {
+    const res = await fetch("https://ai-fake-profile-detection-gt1a.onrender.com/analyze-profile", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ input: username })
+    });
 
-      const data = await res.json();
-      setResult(data);
-      setHasAnalyzed(true);
+    const data = await res.json();
+    console.log(data);
 
-    } catch {
-      alert("Backend connection failed");
-    }
-  };
+    setResult(data);
+    setHasAnalyzed(true);
 
+  } catch (error) {
+    console.log(error);
+    alert(error.message);
+  }
+};
   const analyzeManual = async () => {
     try {
       const res = await fetch("https://ai-fake-profile-detection-gt1a.onrender.com/predict", {
