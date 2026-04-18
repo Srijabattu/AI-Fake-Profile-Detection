@@ -1,4 +1,3 @@
-# update test
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import joblib
@@ -12,8 +11,12 @@ import random
 # =====================================
 app = Flask(__name__)
 
-# Global CORS
-CORS(app)
+# FULL CORS FIX
+CORS(
+    app,
+    resources={r"/*": {"origins": "*"}},
+    supports_credentials=True
+)
 
 # =====================================
 # LOAD MODEL
@@ -83,35 +86,30 @@ def simulate_profile_data(username):
 
 
 def generate_features(profile):
-    username = profile.get("username", "")
-    fullname = profile.get("fullname", "")
-
-    followers = profile.get("#followers", 0)
-    following = profile.get("#following", 1)
-    posts = profile.get("#posts", 0)
+    username = profile["username"]
+    fullname = profile["fullname"]
 
     nums_length_username = sum(c.isdigit() for c in username) / max(len(username), 1)
-    nums_length_fullname = sum(c.isdigit() for c in fullname) / max(len(fullname), 1)
-
     fullname_words = len(fullname.split())
+    nums_length_fullname = sum(c.isdigit() for c in fullname) / max(len(fullname), 1)
 
     name_equals_username = 1 if username.lower() == fullname.lower() else 0
 
-    engagement_ratio = followers / (following + 1)
+    engagement_ratio = profile["#followers"] / (profile["#following"] + 1)
     log_ratio = np.log1p(engagement_ratio)
 
     return [
-        profile.get("profile pic", 0),
+        profile["profile pic"],
         nums_length_username,
         fullname_words,
         nums_length_fullname,
         name_equals_username,
-        profile.get("description length", 0),
-        profile.get("external URL", 0),
-        profile.get("private", 0),
-        posts,
-        followers,
-        following,
+        profile["description length"],
+        profile["external URL"],
+        profile["private"],
+        profile["#posts"],
+        profile["#followers"],
+        profile["#following"],
         log_ratio
     ]
 
@@ -119,10 +117,10 @@ def generate_features(profile):
 def explain_prediction(profile):
     reasons = []
 
-    followers = profile.get("#followers", 0)
-    following = profile.get("#following", 1)
-    posts = profile.get("#posts", 0)
-    bio = profile.get("description length", 0)
+    followers = profile["#followers"]
+    following = profile["#following"]
+    posts = profile["#posts"]
+    bio = profile["description length"]
 
     ratio = followers / (following + 1)
 
@@ -132,19 +130,19 @@ def explain_prediction(profile):
     if posts < 5:
         reasons.append("Very few posts")
 
-    if profile.get("profile pic", 0) == 0:
+    if profile["profile pic"] == 0:
         reasons.append("No profile picture")
 
     if bio < 10:
         reasons.append("Very short bio")
 
-    if profile.get("external URL", 0) == 0:
+    if profile["external URL"] == 0:
         reasons.append("No external website")
 
-    if profile.get("private", 0) == 1:
+    if profile["private"] == 1:
         reasons.append("Private account")
 
-    if not reasons:
+    if len(reasons) == 0:
         reasons.append("Profile behaviour appears normal")
 
     return reasons
@@ -155,17 +153,18 @@ def get_risk_level(score):
         return "Low Risk"
     elif score < 0.7:
         return "Suspicious"
-    return "High Risk"
+    else:
+        return "High Risk"
 
 
 # =====================================
 # FORCE HEADERS
 # =====================================
 @app.after_request
-def add_headers(response):
+def after_request(response):
     response.headers["Access-Control-Allow-Origin"] = "*"
     response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
-    response.headers["Access-Control-Allow-Methods"] = "GET,POST,OPTIONS"
+    response.headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS"
     return response
 
 
@@ -184,7 +183,7 @@ def home():
 def predict():
 
     if request.method == "OPTIONS":
-        return jsonify({"message": "preflight ok"}), 200
+        return jsonify({"message": "ok"}), 200
 
     try:
         data = request.get_json()
@@ -236,7 +235,7 @@ def analyze_profile():
         return "Use POST request for analyze-profile API"
 
     if request.method == "OPTIONS":
-        return jsonify({"message": "preflight ok"}), 200
+        return jsonify({"message": "ok"}), 200
 
     try:
         data = request.get_json()
@@ -279,4 +278,4 @@ def analyze_profile():
 # =====================================
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    app.run(host="0.0.0.0", port=port)
