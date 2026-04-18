@@ -45,7 +45,7 @@ function Dashboard() {
     }
 
     try {
-      const res = await fetch("http://127.0.0.1:5000/analyze-profile", {
+      const res = await fetch("https://ai-fake-profile-detection-gt1a.onrender.com/analyze-profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ input: username })
@@ -62,7 +62,7 @@ function Dashboard() {
 
   const analyzeManual = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:5000/predict", {
+      const res = await fetch("https://ai-fake-profile-detection-gt1a.onrender.com/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(manualData)
