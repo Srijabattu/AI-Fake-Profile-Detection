@@ -5,7 +5,6 @@ import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
 
 function Dashboard() {
-
   const [mode, setMode] = useState("auto");
   const [username, setUsername] = useState("");
 
@@ -26,6 +25,8 @@ function Dashboard() {
   const [result, setResult] = useState(null);
   const [hasAnalyzed, setHasAnalyzed] = useState(false);
 
+  const BACKEND_URL = "https://ai-fake-profile-detection-gt1a.onrender.com";
+
   const handleChange = (e) => {
     setManualData({
       ...manualData,
@@ -38,45 +39,55 @@ function Dashboard() {
     window.location.href = "/";
   };
 
+  // ================= AUTO MODE =================
   const analyzeAuto = async () => {
-  if (!username) {
-    alert("Please enter username");
-    return;
-  }
+    if (!username) {
+      alert("Please enter username or Instagram URL");
+      return;
+    }
 
-  try {
-    const res = await fetch("https://ai-fake-profile-detection-gtla.onrender.com/predict", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ input: username })
-    });
+    try {
+      const res = await fetch(`${BACKEND_URL}/analyze-profile`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          input: username
+        })
+      });
 
-    const data = await res.json();
-    console.log(data);
+      const data = await res.json();
+      console.log(data);
 
-    setResult(data);
-    setHasAnalyzed(true);
+      setResult(data);
+      setHasAnalyzed(true);
 
-  } catch (error) {
-    console.log(error);
-    alert(error.message);
-  }
-};
+    } catch (error) {
+      console.log(error);
+      alert("Backend connection failed");
+    }
+  };
+
+  // ================= MANUAL MODE =================
   const analyzeManual = async () => {
     try {
-      const res = await fetch("https://ai-fake-profile-detection-gtla.onrender.com/predict", {
+      const res = await fetch(`${BACKEND_URL}/predict`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify(manualData)
       });
 
       const data = await res.json();
+      console.log(data);
+
       setResult(data);
       setHasAnalyzed(true);
 
-    } catch {
+    } catch (error) {
+      console.log(error);
       alert("Backend connection failed");
     }
   };
@@ -85,65 +96,130 @@ function Dashboard() {
     <div className="container">
       <div className="cardWrapper">
 
-        <button onClick={handleLogout} style={{float:"right", width:"auto"}}>
+        <button
+          onClick={handleLogout}
+          style={{ float: "right", width: "auto" }}
+        >
           Logout
         </button>
 
         <h2 className="title">AI Profile Detector</h2>
 
+        {/* MODE BUTTONS */}
         <div className="modeButtons">
-          <button onClick={() => {
-            setMode("auto");
-            setResult(null);
-            setHasAnalyzed(false);
-          }}>Auto</button>
 
-          <button onClick={() => {
-            setMode("manual");
-            setResult(null);
-            setHasAnalyzed(false);
-          }}>Manual</button>
+          <button
+            onClick={() => {
+              setMode("auto");
+              setResult(null);
+              setHasAnalyzed(false);
+            }}
+          >
+            Auto
+          </button>
+
+          <button
+            onClick={() => {
+              setMode("manual");
+              setResult(null);
+              setHasAnalyzed(false);
+            }}
+          >
+            Manual
+          </button>
+
         </div>
 
-        {/* AUTO MODE */}
+        {/* ================= AUTO MODE ================= */}
         {mode === "auto" && (
-  <>
-    <p className="title">Analyze Profile</p>
+          <>
+            <p className="title">Analyze Profile</p>
 
-    <div className="formGroup">
-      <input
-        type="text"
-        placeholder="Enter username or URL"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
-    </div>
+            <div className="formGroup">
+              <input
+                type="text"
+                placeholder="Enter username or Instagram URL"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </div>
 
-    <button onClick={analyzeAuto}>Analyze</button>
-  </>
-)}
+            <button onClick={analyzeAuto}>Analyze</button>
+          </>
+        )}
 
-        {/* MANUAL MODE (GRID) */}
+        {/* ================= MANUAL MODE ================= */}
         {mode === "manual" && (
           <>
             <p className="title">Manual Input</p>
 
             <div className="gridForm">
 
-              <input name="profile pic" placeholder="Profile Pic" onChange={handleChange}/>
-              <input name="nums/length username" placeholder="Username Ratio" onChange={handleChange}/>
-              <input name="fullname words" placeholder="Fullname Words" onChange={handleChange}/>
+              <input
+                name="profile pic"
+                placeholder="Profile Pic"
+                onChange={handleChange}
+              />
 
-              <input name="nums/length fullname" placeholder="Fullname Ratio" onChange={handleChange}/>
-              <input name="name==username" placeholder="Name Match" onChange={handleChange}/>
-              <input name="description length" placeholder="Bio Length" onChange={handleChange}/>
+              <input
+                name="nums/length username"
+                placeholder="Username Ratio"
+                onChange={handleChange}
+              />
 
-              <input name="external URL" placeholder="External URL" onChange={handleChange}/>
-              <input name="private" placeholder="Private" onChange={handleChange}/>
-              <input name="#posts" placeholder="Posts" onChange={handleChange}/>
+              <input
+                name="fullname words"
+                placeholder="Fullname Words"
+                onChange={handleChange}
+              />
 
-              <input name="#followers" placeholder="Followers" onChange={handleChange}/>
-              <input name="#following" placeholder="Following" onChange={handleChange}/>
+              <input
+                name="nums/length fullname"
+                placeholder="Fullname Ratio"
+                onChange={handleChange}
+              />
+
+              <input
+                name="name==username"
+                placeholder="Name Match"
+                onChange={handleChange}
+              />
+
+              <input
+                name="description length"
+                placeholder="Bio Length"
+                onChange={handleChange}
+              />
+
+              <input
+                name="external URL"
+                placeholder="External URL"
+                onChange={handleChange}
+              />
+
+              <input
+                name="private"
+                placeholder="Private"
+                onChange={handleChange}
+              />
+
+              <input
+                name="#posts"
+                placeholder="Posts"
+                onChange={handleChange}
+              />
+
+              <input
+                name="#followers"
+                placeholder="Followers"
+                onChange={handleChange}
+              />
+
+              <input
+                name="#following"
+                placeholder="Following"
+                onChange={handleChange}
+              />
 
             </div>
 
@@ -151,13 +227,15 @@ function Dashboard() {
           </>
         )}
 
-        {/* RESULT ONLY AFTER ANALYZE */}
+        {/* ================= RESULT ================= */}
         {hasAnalyzed && result && (
           <div className="result">
 
             <h3>Result</h3>
 
-            <p><b>{result.prediction}</b></p>
+            <p>
+              <b>{result.prediction}</b>
+            </p>
 
             <p>
               <b>Risk:</b>{" "}
@@ -176,12 +254,14 @@ function Dashboard() {
 
             <RiskMeter score={result.risk_score} />
 
+            {/* AUTO MODE REASONS */}
             {result.reasons && (
               <>
                 <h4>Why?</h4>
+
                 <ul>
-                  {result.reasons.map((r, i) => (
-                    <li key={i}>{r}</li>
+                  {result.reasons.map((reason, index) => (
+                    <li key={index}>{reason}</li>
                   ))}
                 </ul>
               </>
