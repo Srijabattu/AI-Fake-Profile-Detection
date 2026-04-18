@@ -164,8 +164,7 @@ def get_risk_level(score):
 
 @app.route("/")
 def home():
-    return "Fake Profile Detection API running"
-
+    return "AI Fake Profile Detection Backend is Live 🚀"
 
 # ---------- MANUAL MODE ----------
 
