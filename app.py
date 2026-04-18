@@ -226,8 +226,10 @@ def predict():
 
 # ---------- AUTO MODE ----------
 
-@app.route("/analyze-profile",methods=["POST"])
+@app.route("/analyze-profile", methods=["GET", "POST"])
 def analyze_profile():
+    if request.method == "GET":
+        return "Use POST request for analyze-profile API"
 
     try:
 
