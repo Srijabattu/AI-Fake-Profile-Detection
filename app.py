@@ -1,4 +1,3 @@
-#updated
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import joblib
@@ -12,19 +11,8 @@ import random
 # =====================================
 app = Flask(__name__)
 
-# FINAL CORS CONFIG
-CORS(
-    app,
-    resources={
-        r"/*": {
-            "origins": [
-                "http://localhost:3000",
-                "https://ai-fake-profile-detection-p9so.vercel.app"
-            ]
-        }
-    },
-    supports_credentials=False
-)
+# SIMPLE + STABLE CORS
+CORS(app)
 
 # =====================================
 # LOAD MODEL
@@ -183,12 +171,8 @@ def health():
 # =====================================
 # MANUAL MODE
 # =====================================
-@app.route("/predict", methods=["POST", "OPTIONS"])
+@app.route("/predict", methods=["POST"])
 def predict():
-
-    if request.method == "OPTIONS":
-        return jsonify({"message": "ok"}), 200
-
     try:
         data = request.get_json()
 
@@ -232,12 +216,8 @@ def predict():
 # =====================================
 # AUTO MODE
 # =====================================
-@app.route("/analyze-profile", methods=["POST", "OPTIONS"])
+@app.route("/analyze-profile", methods=["POST"])
 def analyze_profile():
-
-    if request.method == "OPTIONS":
-        return jsonify({"message": "ok"}), 200
-
     try:
         data = request.get_json()
         username = extract_username(data["input"])
