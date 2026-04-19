@@ -11,7 +11,7 @@ import random
 # =====================================
 app = Flask(__name__)
 
-# CLEAN FINAL CORS FIX
+# FINAL CORS CONFIG
 CORS(
     app,
     resources={
@@ -68,7 +68,6 @@ def simulate_profile_data(username):
         bio_length = random.randint(0, 15)
         profile_pic = random.choice([0, 1])
         private = random.choice([0, 1])
-
     else:
         followers = random.randint(300, 5000)
         following = random.randint(100, 1500)
@@ -183,8 +182,12 @@ def health():
 # =====================================
 # MANUAL MODE
 # =====================================
-@app.route("/predict", methods=["POST"])
+@app.route("/predict", methods=["POST", "OPTIONS"])
 def predict():
+
+    if request.method == "OPTIONS":
+        return jsonify({"message": "ok"}), 200
+
     try:
         data = request.get_json()
 
@@ -228,8 +231,12 @@ def predict():
 # =====================================
 # AUTO MODE
 # =====================================
-@app.route("/analyze-profile", methods=["POST"])
+@app.route("/analyze-profile", methods=["POST", "OPTIONS"])
 def analyze_profile():
+
+    if request.method == "OPTIONS":
+        return jsonify({"message": "ok"}), 200
+
     try:
         data = request.get_json()
         username = extract_username(data["input"])
