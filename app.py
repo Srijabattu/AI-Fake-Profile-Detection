@@ -11,11 +11,18 @@ import random
 # =====================================
 app = Flask(__name__)
 
-# FULL CORS FIX
+# CLEAN FINAL CORS FIX
 CORS(
     app,
-    resources={r"/*": {"origins": "*"}},
-    supports_credentials=True
+    resources={
+        r"/*": {
+            "origins": [
+                "http://localhost:3000",
+                "https://ai-fake-profile-detection-p9so.vercel.app"
+            ]
+        }
+    },
+    supports_credentials=False
 )
 
 # =====================================
@@ -158,17 +165,6 @@ def get_risk_level(score):
 
 
 # =====================================
-# FORCE HEADERS
-# =====================================
-@app.after_request
-def after_request(response):
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
-    response.headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS"
-    return response
-
-
-# =====================================
 # HOME
 # =====================================
 @app.route("/")
@@ -177,14 +173,18 @@ def home():
 
 
 # =====================================
+# HEALTH CHECK
+# =====================================
+@app.route("/health")
+def health():
+    return jsonify({"status": "ok"})
+
+
+# =====================================
 # MANUAL MODE
 # =====================================
-@app.route("/predict", methods=["POST", "OPTIONS"])
+@app.route("/predict", methods=["POST"])
 def predict():
-
-    if request.method == "OPTIONS":
-        return jsonify({"message": "ok"}), 200
-
     try:
         data = request.get_json()
 
@@ -228,15 +228,8 @@ def predict():
 # =====================================
 # AUTO MODE
 # =====================================
-@app.route("/analyze-profile", methods=["GET", "POST", "OPTIONS"])
+@app.route("/analyze-profile", methods=["POST"])
 def analyze_profile():
-
-    if request.method == "GET":
-        return "Use POST request for analyze-profile API"
-
-    if request.method == "OPTIONS":
-        return jsonify({"message": "ok"}), 200
-
     try:
         data = request.get_json()
         username = extract_username(data["input"])
