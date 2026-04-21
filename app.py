@@ -11,21 +11,23 @@ import random
 # =====================================
 app = Flask(__name__)
 
-# SIMPLE + STABLE CORS
-CORS(app)
+# Production CORS
+CORS(
+    app,
+    resources={r"/*": {"origins": "*"}},   # Replace * with your frontend URL later
+    supports_credentials=True
+)
 
 # =====================================
 # LOAD MODEL
 # =====================================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-model = joblib.load(
-    os.path.join(BASE_DIR, "model/improved_fake_profile_model.pkl")
-)
+MODEL_PATH = os.path.join(BASE_DIR, "model", "improved_fake_profile_model.pkl")
+SCALER_PATH = os.path.join(BASE_DIR, "model", "scaler.pkl")
 
-scaler = joblib.load(
-    os.path.join(BASE_DIR, "model/scaler.pkl")
-)
+model = joblib.load(MODEL_PATH)
+scaler = joblib.load(SCALER_PATH)
 
 # =====================================
 # CACHE
@@ -41,8 +43,7 @@ def extract_username(input_text):
         match = re.search(r"instagram\.com/([^/?]+)", input_text)
         if match:
             return match.group(1)
-
-    return input_text.strip()
+    return input_text.strip().lower()
 
 
 def simulate_profile_data(username):
@@ -87,7 +88,6 @@ def generate_features(profile):
     nums_length_username = sum(c.isdigit() for c in username) / max(len(username), 1)
     fullname_words = len(fullname.split())
     nums_length_fullname = sum(c.isdigit() for c in fullname) / max(len(fullname), 1)
-
     name_equals_username = 1 if username.lower() == fullname.lower() else 0
 
     engagement_ratio = profile["#followers"] / (profile["#following"] + 1)
@@ -112,23 +112,18 @@ def generate_features(profile):
 def explain_prediction(profile):
     reasons = []
 
-    followers = profile["#followers"]
-    following = profile["#following"]
-    posts = profile["#posts"]
-    bio = profile["description length"]
-
-    ratio = followers / (following + 1)
+    ratio = profile["#followers"] / (profile["#following"] + 1)
 
     if ratio < 0.1:
         reasons.append("Very low follower-following ratio")
 
-    if posts < 5:
+    if profile["#posts"] < 5:
         reasons.append("Very few posts")
 
     if profile["profile pic"] == 0:
         reasons.append("No profile picture")
 
-    if bio < 10:
+    if profile["description length"] < 10:
         reasons.append("Very short bio")
 
     if profile["external URL"] == 0:
@@ -137,39 +132,42 @@ def explain_prediction(profile):
     if profile["private"] == 1:
         reasons.append("Private account")
 
-    if len(reasons) == 0:
+    if not reasons:
         reasons.append("Profile behaviour appears normal")
 
     return reasons
 
 
 def get_risk_level(score):
-    if score < 0.3:
+    if score < 0.30:
         return "Low Risk"
-    elif score < 0.7:
+    elif score < 0.70:
         return "Suspicious"
-    else:
-        return "High Risk"
+    return "High Risk"
 
 
 # =====================================
-# HOME
+# ROUTES
 # =====================================
+
 @app.route("/")
 def home():
-    return "<h1>Backend Running Successfully 🚀</h1>"
+    return jsonify({
+        "message": "AI Fake Profile Detection Backend Running 🚀",
+        "status": "success"
+    })
 
 
-# =====================================
-# HEALTH CHECK
-# =====================================
 @app.route("/health")
 def health():
-    return jsonify({"status": "ok"})
+    return jsonify({
+        "status": "ok",
+        "server": "running"
+    })
 
 
 # =====================================
-# MANUAL MODE
+# MANUAL PREDICTION
 # =====================================
 @app.route("/predict", methods=["POST"])
 def predict():
@@ -200,10 +198,8 @@ def predict():
         prediction = model.predict(features)[0]
         probability = model.predict_proba(features)[0][1]
 
-        result = "Fake Profile" if prediction == 1 else "Genuine Profile"
-
         return jsonify({
-            "prediction": result,
+            "prediction": "Fake Profile" if prediction == 1 else "Genuine Profile",
             "risk_score": round(float(probability), 3),
             "risk_level": get_risk_level(float(probability)),
             "mode": "manual"
@@ -214,7 +210,7 @@ def predict():
 
 
 # =====================================
-# AUTO MODE
+# AUTO ANALYZE
 # =====================================
 @app.route("/analyze-profile", methods=["POST"])
 def analyze_profile():
@@ -234,11 +230,9 @@ def analyze_profile():
         prediction = model.predict(features)[0]
         probability = model.predict_proba(features)[0][1]
 
-        result = "Fake Profile" if prediction == 1 else "Genuine Profile"
-
         response = {
             "username": username,
-            "prediction": result,
+            "prediction": "Fake Profile" if prediction == 1 else "Genuine Profile",
             "risk_score": round(float(probability), 3),
             "risk_level": get_risk_level(float(probability)),
             "mode": "auto",
@@ -247,7 +241,6 @@ def analyze_profile():
         }
 
         prediction_cache[username] = response
-
         return jsonify(response)
 
     except Exception as e:
@@ -255,7 +248,7 @@ def analyze_profile():
 
 
 # =====================================
-# RUN
+# MAIN
 # =====================================
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

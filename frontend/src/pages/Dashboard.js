@@ -25,7 +25,7 @@ function Dashboard() {
   const [result, setResult] = useState(null);
   const [hasAnalyzed, setHasAnalyzed] = useState(false);
 
-  const BACKEND_URL = "https://ai-fake-profile-detection-gt1a.onrender.com";
+  const BACKEND_URL = "http://localhost:5000";
 
   const handleChange = (e) => {
     setManualData({
