@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate
+} from "react-router-dom";
 
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -9,30 +14,53 @@ import { auth } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
 function App() {
-
   const [user, setUser] = useState(undefined);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+      setUser(currentUser || null);
     });
+
     return () => unsubscribe();
   }, []);
 
-  if (user === undefined) return <div>Loading...</div>;
+  if (user === undefined) {
+    return <div style={{ padding: "40px" }}>Loading...</div>;
+  }
 
   return (
     <BrowserRouter>
       <Routes>
 
-        {/* Login */}
-        <Route path="/" element={user ? <Dashboard /> : <Login />} />
+        {/* Home/Login */}
+        <Route
+          path="/"
+          element={
+            user ? <Navigate to="/dashboard" /> : <Login />
+          }
+        />
 
         {/* Signup */}
-        <Route path="/signup" element={<Signup />} />
+        <Route
+          path="/signup"
+          element={
+            user ? <Navigate to="/dashboard" /> : <Signup />
+          }
+        />
 
-        {/* Dashboard (Protected) */}
-        <Route path="/dashboard" element={user ? <Dashboard /> : <Login />} />
+        {/* Protected Dashboard */}
+        <Route
+          path="/dashboard"
+          element={
+            user ? <Dashboard /> : <Navigate to="/" />
+          }
+        />
+
+        {/* Unknown Routes */}
+        <Route
+          path="*"
+          element={<Navigate to="/" />}
+        />
 
       </Routes>
     </BrowserRouter>

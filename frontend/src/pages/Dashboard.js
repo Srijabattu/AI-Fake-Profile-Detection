@@ -7,6 +7,7 @@ import { auth } from "../firebase";
 function Dashboard() {
   const [mode, setMode] = useState("auto");
   const [username, setUsername] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const [manualData, setManualData] = useState({
     "profile pic": 1,
@@ -16,7 +17,7 @@ function Dashboard() {
     "name==username": 0,
     "description length": 20,
     "external URL": 0,
-    "private": 0,
+    private: 0,
     "#posts": 10,
     "#followers": 500,
     "#following": 200
@@ -25,13 +26,19 @@ function Dashboard() {
   const [result, setResult] = useState(null);
   const [hasAnalyzed, setHasAnalyzed] = useState(false);
 
-  const BACKEND_URL = "http://localhost:5000";
+  // ✅ LIVE RAILWAY BACKEND
+  const BACKEND_URL = "https://web-production-9effe.up.railway.app";
 
   const handleChange = (e) => {
     setManualData({
       ...manualData,
       [e.target.name]: Number(e.target.value)
     });
+  };
+
+  const resetResult = () => {
+    setResult(null);
+    setHasAnalyzed(false);
   };
 
   const handleLogout = async () => {
@@ -41,12 +48,15 @@ function Dashboard() {
 
   // ================= AUTO MODE =================
   const analyzeAuto = async () => {
-    if (!username) {
+    if (!username.trim()) {
       alert("Please enter username or Instagram URL");
       return;
     }
 
     try {
+      setLoading(true);
+      resetResult();
+
       const res = await fetch(`${BACKEND_URL}/analyze-profile`, {
         method: "POST",
         headers: {
@@ -58,20 +68,27 @@ function Dashboard() {
       });
 
       const data = await res.json();
-      console.log(data);
+
+      if (!res.ok) {
+        throw new Error(data.error || "Analysis failed");
+      }
 
       setResult(data);
       setHasAnalyzed(true);
-
     } catch (error) {
       console.log(error);
       alert("Backend connection failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   // ================= MANUAL MODE =================
   const analyzeManual = async () => {
     try {
+      setLoading(true);
+      resetResult();
+
       const res = await fetch(`${BACKEND_URL}/predict`, {
         method: "POST",
         headers: {
@@ -81,21 +98,24 @@ function Dashboard() {
       });
 
       const data = await res.json();
-      console.log(data);
+
+      if (!res.ok) {
+        throw new Error(data.error || "Prediction failed");
+      }
 
       setResult(data);
       setHasAnalyzed(true);
-
     } catch (error) {
       console.log(error);
       alert("Backend connection failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="container">
       <div className="cardWrapper">
-
         <button
           onClick={handleLogout}
           style={{ float: "right", width: "auto" }}
@@ -103,16 +123,14 @@ function Dashboard() {
           Logout
         </button>
 
-        <h2 className="title">AI Profile Detector</h2>
+        <h2 className="title">AI Fake Profile Detector</h2>
 
         {/* MODE BUTTONS */}
         <div className="modeButtons">
-
           <button
             onClick={() => {
               setMode("auto");
-              setResult(null);
-              setHasAnalyzed(false);
+              resetResult();
             }}
           >
             Auto
@@ -121,13 +139,11 @@ function Dashboard() {
           <button
             onClick={() => {
               setMode("manual");
-              setResult(null);
-              setHasAnalyzed(false);
+              resetResult();
             }}
           >
             Manual
           </button>
-
         </div>
 
         {/* ================= AUTO MODE ================= */}
@@ -144,7 +160,9 @@ function Dashboard() {
               />
             </div>
 
-            <button onClick={analyzeAuto}>Analyze</button>
+            <button onClick={analyzeAuto} disabled={loading}>
+              {loading ? "Analyzing..." : "Analyze"}
+            </button>
           </>
         )}
 
@@ -154,10 +172,9 @@ function Dashboard() {
             <p className="title">Manual Input</p>
 
             <div className="gridForm">
-
               <input
                 name="profile pic"
-                placeholder="Profile Pic"
+                placeholder="Profile Pic (0/1)"
                 onChange={handleChange}
               />
 
@@ -181,7 +198,7 @@ function Dashboard() {
 
               <input
                 name="name==username"
-                placeholder="Name Match"
+                placeholder="Name Match (0/1)"
                 onChange={handleChange}
               />
 
@@ -193,13 +210,13 @@ function Dashboard() {
 
               <input
                 name="external URL"
-                placeholder="External URL"
+                placeholder="External URL (0/1)"
                 onChange={handleChange}
               />
 
               <input
                 name="private"
-                placeholder="Private"
+                placeholder="Private (0/1)"
                 onChange={handleChange}
               />
 
@@ -220,17 +237,17 @@ function Dashboard() {
                 placeholder="Following"
                 onChange={handleChange}
               />
-
             </div>
 
-            <button onClick={analyzeManual}>Analyze</button>
+            <button onClick={analyzeManual} disabled={loading}>
+              {loading ? "Analyzing..." : "Analyze"}
+            </button>
           </>
         )}
 
         {/* ================= RESULT ================= */}
         {hasAnalyzed && result && (
           <div className="result">
-
             <h3>Result</h3>
 
             <p>
@@ -258,7 +275,6 @@ function Dashboard() {
             {result.reasons && (
               <>
                 <h4>Why?</h4>
-
                 <ul>
                   {result.reasons.map((reason, index) => (
                     <li key={index}>{reason}</li>
@@ -266,10 +282,8 @@ function Dashboard() {
                 </ul>
               </>
             )}
-
           </div>
         )}
-
       </div>
     </div>
   );
